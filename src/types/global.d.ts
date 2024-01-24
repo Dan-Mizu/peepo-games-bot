@@ -1,5 +1,4 @@
 import { Client } from "discord.js";
-import Rcon from "rcon-srcds";
 
 declare global {
 	interface IServerData {
@@ -13,7 +12,7 @@ declare global {
 	}
 
 	interface IServerConfig {
-		TYPE: "minecraft" | "palworld";
+		TYPE: "palworld";
 		DISCORD_BOT_TOKEN: string;
 		RCON_HOST: string;
 		RCON_PORT: number;
@@ -21,7 +20,6 @@ declare global {
 	}
 
 	interface IServerInfo extends IServerConfig {
-		rconClient: Rcon;
 		discordClient: Client;
 		connectionAttempts: number;
 		data: IServerData;

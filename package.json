@@ -14,7 +14,6 @@
   "type": "module",
   "dependencies": {
     "discord.js": "^14.14.1",
-    "rcon-srcds": "^2.1.0",
     "strip-ansi": "^7.1.0"
   }
 }
