@@ -1,20 +1,33 @@
-import Rcon from "rcon-srcds";
+import path from "node:path";
+import stripAnsi from "strip-ansi";
 
 export default {
-	getList: async (rconClient: Rcon): Promise<string | void> => {
-		// get player list data
-		let playerListResponse = rconClient
-			.execute("ShowPlayers")
-			.then(
-				(response) => {
-					console.log(response);
-					return response as string;
-				}
-			)
-			.catch((error) => {
-				console.error(error);
-				return;
-			});
+	getList: async (serverInfo: IServerInfo): Promise<string | void> => {
+		const arrconLocation = path.join(
+			import.meta.dir,
+			process.env.ARRCON_PATH as string
+		);
+
+		const arrcon = Bun.spawn([
+			arrconLocation,
+			"-H",
+			serverInfo.RCON_HOST,
+			"-P",
+			String(serverInfo.RCON_PORT),
+			"-p",
+			serverInfo.RCON_PASSWORD,
+			"ShowPlayers",
+		]);
+
+		let playerListResponse = stripAnsi(
+			await new Response(arrcon.stdout).text()
+		)
+			.split("\n")
+			.slice(1)
+			.join("\n");
+
+		arrcon.kill();
+
 		return playerListResponse;
 	},
 	parseDataFromList: (playerListResponse: string): IServerData => {
@@ -25,23 +38,27 @@ export default {
 			maxPlayerCount: 0,
 		};
 
-		// // format response and separate player numbers/names
-		// let numberDataUnparsed, playerNamesUnparsed;
-		// [numberDataUnparsed, playerNamesUnparsed] = playerListResponse
-		// 	.replace("There are ", "")
-		// 	.replace(" of a max of", "")
-		// 	.replace(" players online", "")
-		// 	.split(":");
-		// newServerData.onlinePlayerNames = playerNamesUnparsed
-		// 	.trim()
-		// 	.replaceAll(",", "")
-		// 	.split(" ");
+		// remove unnecessary data and characters
+		let formattedResponse = playerListResponse
+			.trim()
+			.replace(/[\r\n]+/gm, ",")
+			.split(",")
+			.slice(3);
 
-		// // get player counts
-		// [newServerData.onlinePlayerCount, newServerData.maxPlayerCount] =
-		// 	numberDataUnparsed.split(" ").map((string: string) => {
-		// 		return parseInt(string);
-		// 	});
+		// get player name list
+		let players: string[] = [];
+		let index = 0;
+		for (const data of formattedResponse) {
+			if (index == 0 || index > 2) {
+				players.push(data);
+				index = 0;
+			}
+			index++;
+		}
+
+		// set data
+		newServerData.onlinePlayerCount = players.length;
+		newServerData.onlinePlayerNames = players;
 
 		return newServerData;
 	},

@@ -29,9 +29,7 @@ import Rcon from "rcon-srcds";
 // run `list` command, and format response
 const getPlayers = async (serverInfo: IServerInfo) => {
 	// get player list data
-	let playerListResponse = await server[serverInfo.TYPE].getList(
-		serverInfo.rconClient
-	);
+	let playerListResponse = await server[serverInfo.TYPE].getList(serverInfo);
 
 	// no response
 	if (!playerListResponse) return;
@@ -99,10 +97,10 @@ const fetchData = async (serverInfo: IServerInfo) => {
 	// get players
 	await getPlayers(serverInfo);
 
-	// queue next check (3 seconds)
+	// queue next check (1 minute)
 	setTimeout(() => {
 		fetchData(serverInfo);
-	}, 3000);
+	}, 60000);
 };
 
 /**

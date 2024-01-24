@@ -1,9 +1,9 @@
 import Rcon from "rcon-srcds";
 
 export default {
-	getList: async (rconClient: Rcon): Promise<string | void> => {
+	getList: async (serverInfo: IServerInfo): Promise<string | void> => {
 		// get player list data
-		let playerListResponse = await rconClient
+		let playerListResponse = await serverInfo.rconClient
 			.execute("list")
 			.then((response) => {
 				return response as string;
