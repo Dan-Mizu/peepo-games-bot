@@ -22,6 +22,9 @@ export default {
 		let playerListResponse = stripAnsi(
 			await new Response(arrcon.stdout).text()
 		)
+			.replace("Authentication Successful.", "")
+			.replace(`Use <Ctrl + C> or type "exit" to quit.`, "")
+			.trim()
 			.split("\n")
 			.slice(1)
 			.join("\n");
